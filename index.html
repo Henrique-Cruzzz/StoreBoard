@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --champagne: #e9ca96;
+            --salmon: #D88373;
+            --mahogany: #BD1E1E;
+            --graphite: #33312E;
+            --midnight-blue: #18206F;
+            --deep-navy: #17255A;
+            --white: #FFFFFF;
+            --light-gray: #f4f4f9;
+            --border-color: #ddd;
+            --overlay: rgba(0, 0, 0, 0.7);
+        }
+
+        #login-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--graphite);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .login-card {
+            background-color: var(--champagne);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        .login-input:focus {
+            border-color: var(--mahogany);
+            box-shadow: 0 0 5px rgba(189, 30, 30, 0.3);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--mahogany);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #a91919;
+            transform: scale(1.02);
+        }
+        .login-card h2{
+            color: #BD1E1E;
+            font-size: 40px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="login-section">
+        
+        <div class="login-card">
+            <h2>StoreBoard</h2>
+            <form id="loginForm">
+                <input type="email" placeholder="Email" required class="login-input">
+
+                <input type="password" placeholder="Senha" required class="login-input">
+
+                <input type="text" placeholder="2FA Code" required class="login-input">
+
+                <button type="submit" class="btn-login">Acessar</button>
+            </form>
+            <p style="color: red; font-size:16px;">Digite qualquer informação nos campos para logar</p>
+        </div>
+    </div>
+    <script>
+        // --- LOGIN ---
+        document.getElementById('loginForm').onsubmit = (e) => {
+            e.preventDefault();
+
+            window.location="main.html";
+
+            renderAll();
+        };
+    </script>
+</body>
+
+</html>
