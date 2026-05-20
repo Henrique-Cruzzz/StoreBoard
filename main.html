@@ -509,7 +509,20 @@
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
         function formatCurrency(value) { return 'R$ ' + parseFloat(value).toFixed(2).replace('.', ','); }
         function formatDate(dateString) { const date = new Date(dateString); return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR'); }
-        function formatDateOnly(dateString) { return new Date(dateString).toLocaleDateString('pt-BR'); }
+        function formatDateOnly(dateString) {
+            if (!dateString) return '';
+            // if format is YYYY-MM-DD (from <input type="date">), construct a local date
+            const match = String(dateString).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (match) {
+                const y = parseInt(match[1], 10);
+                const m = parseInt(match[2], 10) - 1;
+                const d = parseInt(match[3], 10);
+                return new Date(y, m, d).toLocaleDateString('pt-BR');
+            }
+            const date = new Date(dateString);
+            if (isNaN(date)) return String(dateString);
+            return date.toLocaleDateString('pt-BR');
+        }
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); AppState.editingId = null; }
 
@@ -955,7 +968,15 @@
             const tbody = document.getElementById('fiados-table');
             if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum cliente encontrado</td></tr>'; return; }
             tbody.innerHTML = filtered.map(f => {
-                const hoje = new Date(); const prazo = new Date(f.dataPrazo); let status, badgeClass;
+                const hoje = new Date();
+                let prazo;
+                if (f.dataPrazo && /^\d{4}-\d{2}-\d{2}$/.test(f.dataPrazo)) {
+                    const parts = f.dataPrazo.split('-').map(Number);
+                    prazo = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+                } else {
+                    prazo = new Date(f.dataPrazo);
+                }
+                let status, badgeClass;
                 if (f.pago) { status = 'Pago'; badgeClass = 'badge-success'; }
                 else if (prazo < hoje) { status = 'Prazo Esgotado'; badgeClass = 'badge-danger'; }
                 else { status = 'Não Pago'; badgeClass = 'badge-warning'; }
