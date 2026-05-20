@@ -239,7 +239,6 @@
                                 <th>Telefone</th>
                                 <th>Email</th>
                                 <th>CPF</th>
-                                <th>Cidade</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -417,8 +416,6 @@
                 <div class="form-group"><label>Email</label><input type="email" id="cli-email"></div>
                 <div class="form-group"><label>CPF *</label><input type="text" id="cli-cpf" required></div>
                 <div class="form-group"><label>Endereço</label><input type="text" id="cli-endereco"></div>
-                <div class="form-group"><label>Cidade</label><input type="text" id="cli-cidade"></div>
-                <div class="form-group"><label>Estado</label><input type="text" id="cli-estado" maxlength="2"></div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary"
                         onclick="closeModal('modal-cliente')">Cancelar</button><button type="submit"
                         class="btn btn-primary">Salvar</button></div>
@@ -1043,8 +1040,8 @@
             const search = document.getElementById('search-cliente').value.toLowerCase();
             const filtered = AppState.clientes.filter(c => c.nome.toLowerCase().includes(search) || c.telefone.includes(search) || c.cpf.includes(search) || c.email.toLowerCase().includes(search));
             const tbody = document.getElementById('clientes-table');
-            if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum cliente encontrado</td></tr>'; return; }
-            tbody.innerHTML = filtered.map(c => `<tr><td><strong>${c.nome}</strong></td><td>${c.telefone}</td><td>${c.email}</td><td>${c.cpf}</td><td>${c.cidade} - ${c.estado}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editCliente('${c.id}')">✏️</button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteCliente('${c.id}')">🗑️</button></div></td></tr>`).join('');
+            if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum cliente encontrado</td></tr>'; return; }
+            tbody.innerHTML = filtered.map(c => `<tr><td><strong>${c.nome}</strong></td><td>${c.telefone}</td><td>${c.email}</td><td>${c.cpf}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editCliente('${c.id}')">✏️</button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteCliente('${c.id}')">🗑️</button></div></td></tr>`).join('');
         }
 
         document.getElementById('search-cliente').addEventListener('input', renderClientes);
@@ -1057,10 +1054,12 @@
         document.getElementById('form-cliente').addEventListener('submit', (e) => {
             e.preventDefault();
             const data = {
-                nome: document.getElementById('cli-nome').value, telefone: document.getElementById('cli-telefone').value,
-                email: document.getElementById('cli-email').value, cpf: document.getElementById('cli-cpf').value,
-                endereco: document.getElementById('cli-endereco').value, cidade: document.getElementById('cli-cidade').value,
-                estado: document.getElementById('cli-estado').value, dataCadastro: new Date().toISOString()
+                nome: document.getElementById('cli-nome').value,
+                telefone: document.getElementById('cli-telefone').value,
+                email: document.getElementById('cli-email').value,
+                cpf: document.getElementById('cli-cpf').value,
+                endereco: document.getElementById('cli-endereco').value,
+                dataCadastro: new Date().toISOString()
             };
             if (AppState.editingId) {
                 const index = AppState.clientes.findIndex(c => c.id === AppState.editingId);
@@ -1074,8 +1073,7 @@
             document.getElementById('modal-cliente-title').textContent = 'Editar Cliente';
             document.getElementById('cli-nome').value = cliente.nome; document.getElementById('cli-telefone').value = cliente.telefone;
             document.getElementById('cli-email').value = cliente.email; document.getElementById('cli-cpf').value = cliente.cpf;
-            document.getElementById('cli-endereco').value = cliente.endereco; document.getElementById('cli-cidade').value = cliente.cidade;
-            document.getElementById('cli-estado').value = cliente.estado; openModal('modal-cliente');
+            document.getElementById('cli-endereco').value = cliente.endereco; openModal('modal-cliente');
         }
 
         function deleteCliente(id) {
