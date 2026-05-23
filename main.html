@@ -118,6 +118,10 @@
                     <h2>Gerenciar Produtos</h2>
                     <button class="btn btn-primary" id="add-produto">+ Novo Produto</button>
                 </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label>Pesquisar</label>
+                    <input type="text" id="search-estoque" placeholder="Pesquisar por nome, categoria, código, preço..." autocomplete="off">
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -139,31 +143,22 @@
 
         <div id="movimentacao-view" class="view">
             <div class="card">
-                <h2 class="mb-4">Registrar Movimentação</h2>
-                <form id="form-movimentacao">
-                    <div class="toggle-group">
-                        <button type="button" class="toggle-btn active" data-tipo="entrada">Entrada</button>
-                        <button type="button" class="toggle-btn" data-tipo="saida">Saída</button>
-                    </div>
-                    <input type="hidden" id="mov-tipo" value="entrada">
-                    <div class="form-group"><label>Produto *</label>
-                        <div class="autocomplete">
-                            <input type="text" id="mov-produto-autocomplete"
-                                placeholder="Pesquisar por código ou nome..." autocomplete="off"
-                                aria-autocomplete="list" aria-controls="mov-produto-list" aria-expanded="false">
-                            <div id="mov-produto-list" class="autocomplete-list" aria-hidden="true"></div>
-                            <input type="hidden" id="mov-produto-selected-id">
-                        </div>
-                    </div>
-                    <div class="form-group"><label>Quantidade *</label><input type="number" id="mov-quantidade" min="1"
-                            required></div>
-                    <div class="form-group"><label>Motivo/Observação</label><textarea id="mov-motivo"
-                            rows="3"></textarea></div>
-                    <button type="submit" class="btn btn-primary">Registrar Movimentação</button>
-                </form>
+                <div class="flex justify-between items-center mb-4">
+                    <h2>Movimentação</h2>
+                    <button class="btn btn-primary" id="open-registrar-mov">Registrar Movimentação</button>
+                </div>
+                <p style="color: #4b5563; margin: 0 0 1rem;">Clique em "Registrar Movimentação" para abrir a janela de registro.</p>
             </div>
-            <div class="card">
+            <div class="card" id="card">
                 <h2 class="mb-4">Histórico de Movimentações</h2>
+                <div class="form-group" style="margin-bottom: 1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                    <input type="text" id="search-movimentacao" placeholder="Pesquisar por código, produto, motivo..." style="min-width:200px;">
+                    <select id="filter-mov-tipo" style="min-width:140px;">
+                        <option value="all">Todos os tipos</option>
+                        <option value="entrada">Entrada</option>
+                        <option value="saida">Saída</option>
+                    </select>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -198,7 +193,15 @@
                     <h2>Clientes Fiado (Prancheta)</h2>
                     <button class="btn btn-primary" id="add-fiado">+ Novo Cliente</button>
                 </div>
-                <input type="text" id="search-fiado" placeholder="Buscar..." class="mb-4">
+                <div class="form-group" style="margin-bottom: 1rem; display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+                    <input type="text" id="search-fiado" placeholder="Buscar por código, nome, telefone, CPF..." style="min-width:200px;">
+                    <select id="filter-fiado-pago" style="min-width:140px;">
+                        <option value="all">Todos</option>
+                        <option value="paid">Pago</option>
+                        <option value="unpaid">Não Pago</option>
+                        <option value="expired">Prazo Esgotado</option>
+                    </select>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -258,7 +261,10 @@
             <div class="card">
                 <div class="flex justify-between items-center mb-4">
                     <h2>Cadastro de Fornecedores</h2>
-                    <button class="btn btn-primary" id="add-fornecedor">+ Cadastrar Fornecedor</button>
+                    <div class="flex gap-2">
+                        <button class="btn btn-primary" id="add-fornecedor">+ Cadastrar Fornecedor</button>
+                        <button class="btn btn-secondary" id="open-gerenciar-categorias-fornecedor">Gerenciar Categorias</button>
+                    </div>
                 </div>
                 <input type="text" id="search-fornecedor" placeholder="Buscar..." class="mb-4">
                 <div class="table-container">
@@ -302,6 +308,31 @@
     </main>
 
     <!-- Modais aqui embaixo -->
+    <div id="modal-movimentacao" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registrar Movimentação</h2><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="closeModal('modal-movimentacao')">✕</button>
+            </div>
+            <form id="form-movimentacao">
+                <div class="toggle-group">
+                    <button type="button" class="toggle-btn active" data-tipo="entrada">Entrada</button>
+                    <button type="button" class="toggle-btn" data-tipo="saida">Saída</button>
+                </div>
+                <input type="hidden" id="mov-tipo" value="entrada">
+                <div class="form-group"><label>Produto *</label>
+                    <div class="autocomplete">
+                        <input type="text" id="mov-produto-autocomplete" placeholder="Pesquisar por código ou nome..." autocomplete="off" aria-autocomplete="list" aria-controls="mov-produto-list" aria-expanded="false">
+                        <div id="mov-produto-list" class="autocomplete-list" aria-hidden="true"></div>
+                        <input type="hidden" id="mov-produto-selected-id">
+                    </div>
+                </div>
+                <div class="form-group"><label>Quantidade *</label><input type="number" id="mov-quantidade" min="1" required></div>
+                <div class="form-group"><label>Motivo/Observação</label><textarea id="mov-motivo" rows="3"></textarea></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="closeModal('modal-movimentacao')">Cancelar</button><button type="submit" class="btn btn-primary">Registrar Movimentação</button></div>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-categoria" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
@@ -329,6 +360,19 @@
                 <button class="btn btn-primary" id="add-categoria">+ Nova Categoria</button>
             </div>
             <div id="modal-categorias-list" class="grid grid-3"></div>
+        </div>
+    </div>
+
+    <div id="modal-gerenciar-categorias-fornecedor" class="modal">
+        <div class="modal-content" style="max-width: 800px; width: 95%;">
+            <div class="modal-header">
+                <h2>Gerenciar Categorias (Fornecedores)</h2><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="closeModal('modal-gerenciar-categorias-fornecedor')">✕</button>
+            </div>
+            <div class="flex justify-between items-center mb-4">
+                <p style="margin: 0; color: #4b5563;">Categorias específicas para fornecedores.</p>
+                <button class="btn btn-primary" id="add-categoria-fornecedor">+ Nova Categoria</button>
+            </div>
+            <div id="modal-categorias-list-fornecedor" class="grid grid-3"></div>
         </div>
     </div>
 
@@ -491,15 +535,41 @@
 
     <script>
         const AppState = {
-            categorias: [
+            // categorias separadas: produtos e fornecedores (independentes)
+            categoriasProdutos: [
                 { id: '1', nome: 'Eletrônicos', descricao: 'Produtos eletrônicos' },
                 { id: '2', nome: 'Alimentos', descricao: 'Produtos alimentícios' }
             ],
-            produtos: [],
-            clientes: [],
-            fornecedores: [],
-            fiados: [],
-            movimentacoes: [],
+            categoriasFornecedores: [
+                { id: '1', nome: 'Eletrônicos', descricao: 'Produtos eletrônicos' },
+                { id: '2', nome: 'Alimentos', descricao: 'Produtos alimentícios' }
+            ],
+            // contexto corrente para o modal de categoria ('produtos' | 'fornecedores')
+            categoriaContext: 'produtos',
+            produtos: [
+                { id: '1', codigo: '1', nome: 'Mouse', categorias: ['Eletrônicos'], quantidade: 20, minimo: 5, preco: 59.99, localizacao: 'E1' },
+                { id: '2', codigo: '2', nome: 'Teclado', categorias: ['Eletrônicos'], quantidade: 32, minimo: 5, preco: 79.99, localizacao: 'E1' },
+                { id: '3', codigo: '3', nome: 'Fone Bluetooth', categorias: ['Eletrônicos'], quantidade: 27, minimo: 10, preco: 89.99, localizacao: 'E2' },
+                { id: '4', codigo: '4', nome: 'Maçã 1kg', categorias: ['Alimentos'], quantidade: 136, minimo: 40, preco: 7.99, localizacao: 'A1' },
+                { id: '5', codigo: '5', nome: 'Laranja 1kg', categorias: ['Alimentos'], quantidade: 155, minimo: 30, preco: 3.99, localizacao: 'A2' },
+                { id: '6', codigo: '6', nome: 'Pera 1kg', categorias: ['Alimentos'], quantidade: 182, minimo: 50, preco: 4.99, localizacao: 'A3' },
+            ],
+            clientes: [
+                { id: '1', nome: 'Cleiton', telefone: '15 123456789', email: 'cleiton@gmail.com', cpf: '12345612345', endereco: 'Itapetininga - Rua meio legal'},
+                { id: '2', nome: 'Roberto', telefone: '15 987654321', email: 'robertolegal@gmail.com', cpf: '65432154321', endereco: 'Itapetininga - Rua Legal'},
+            ],
+            fornecedores: [
+                { id: 'fr1', nome: 'Fornecedor A', cpfCnpj: '12.345.678/0001-99', categorias: ['Eletrônicos'], cep: '18200-000', rua: 'Av. Central', numero: '100', bairro: 'Centro', cidade: 'Itapetininga', pais: 'Brasil', telefone: '15 3333-4444', email: 'contato@fornecedora.com' },
+                { id: 'fr2', nome: 'Fornecedor B', cpfCnpj: '98.765.432/0001-11', categorias: ['Alimentos'], cep: '18200-111', rua: 'Rua das Flores', numero: '45', bairro: 'Jardim', cidade: 'Itapetininga', pais: 'Brasil', telefone: '15 5555-6666', email: 'comercial@fornecedorb.com' }
+            ],
+            fiados: [
+                { id: 'f1', codigo: 'PRANCH0001', clienteId: '1', nome: 'Cleiton', telefone: '15 123456789', cpf: '12345612345', valorDevido: 120.5, dataPrazo: '2026-06-15', pago: false, observacoes: 'Compra a prazo - materiais', dataCriacao: '2026-05-01T10:00:00.000Z' },
+                { id: 'f2', codigo: 'PRANCH0002', clienteId: '2', nome: 'Roberto', telefone: '15 987654321', cpf: '65432154321', valorDevido: 75.0, dataPrazo: '2026-05-25', pago: true, observacoes: 'Pagamento parcial recebido', dataCriacao: '2026-04-20T14:30:00.000Z' }
+            ],
+            movimentacoes: [
+                { id: 'm1', produtoId: '1', produtoNome: 'Mouse', produtoCodigo: '1', produtoCategorias: ['Eletrônicos'], tipo: 'entrada', quantidade: 10, data: '2026-05-15T09:30:00.000Z', motivo: 'Reabastecimento' },
+                { id: 'm2', produtoId: '4', produtoNome: 'Maçã 1kg', produtoCodigo: '4', produtoCategorias: ['Alimentos'], tipo: 'saida', quantidade: 5, data: '2026-05-20T15:45:00.000Z', motivo: 'Venda' }
+            ],
             carrinho: [],
             desconto: 0,
             tipoDesconto: 'porcentagem',
@@ -540,72 +610,207 @@
         function renderView(view) {
             switch (view) {
                 case 'caixa': renderProdutosParaVenda(); renderCarrinho(); break;
-                case 'estoque': renderCategorias(); renderProdutos(); break;
+                case 'estoque': renderCategoriasProdutos(); renderProdutos(); break;
                 case 'movimentacao': renderMovimentacoes(); updateProdutosSelect(); break;
                 case 'prancheta': renderFiados(); updateClientesSelect(); break;
                 case 'clientes': renderClientes(); break;
-                case 'fornecedores': renderFornecedores(); break;
+                case 'fornecedores': renderFornecedores(); renderCategoriasFornecedores(); break;
             }
         }
 
-        function renderCategorias() {
-            const template = AppState.categorias.length === 0
+        function renderCategoriasProdutos() {
+            const arr = AppState.categoriasProdutos || [];
+            const template = arr.length === 0
                 ? '<div class="empty-state" style="grid-column: 1/-1;">Nenhuma categoria cadastrada</div>'
-                : AppState.categorias.map(cat => `<div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 13px"><div class="flex justify-between items-center"><div><h3 style="font-weight: 600;">${cat.nome}</h3>${cat.descricao ? `<p style="font-size: 12px; color: #6b7280; margin-top: 0.25rem;">${cat.descricao}</p>` : ''}</div><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editCategoria('${cat.id}')"><ion-icon name="pencil-outline" id="ionicons-estoque"></ion-icon></button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteCategoria('${cat.id}')"><ion-icon name="trash-outline" id="ionicons-estoque"></button></div></div></div>`).join('');
+                : arr.map(cat => `<div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 13px"><div class="flex justify-between items-center"><div><h3 style="font-weight: 600;">${cat.nome}</h3>${cat.descricao ? `<p style="font-size: 12px; color: #6b7280; margin-top: 0.25rem;">${cat.descricao}</p>` : ''}</div><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editCategoria('${cat.id}','produtos')"><ion-icon name="pencil-outline" id="ionicons-estoque"></ion-icon></button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteCategoria('${cat.id}','produtos')"><ion-icon name="trash-outline" id="ionicons-estoque"></button></div></div></div>`).join('');
             const container = document.getElementById('categorias-list');
             const modalContainer = document.getElementById('modal-categorias-list');
             if (container) container.innerHTML = template;
             if (modalContainer) modalContainer.innerHTML = template;
         }
 
+        function renderCategoriasFornecedores() {
+            const arr = AppState.categoriasFornecedores || [];
+            const template = arr.length === 0
+                ? '<div class="empty-state" style="grid-column: 1/-1;">Nenhuma categoria cadastrada</div>'
+                : arr.map(cat => `<div style="padding: 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 13px"><div class="flex justify-between items-center"><div><h3 style="font-weight: 600;">${cat.nome}</h3>${cat.descricao ? `<p style="font-size: 12px; color: #6b7280; margin-top: 0.25rem;">${cat.descricao}</p>` : ''}</div><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editCategoria('${cat.id}','fornecedores')"><ion-icon name="pencil-outline" id="ionicons-estoque"></ion-icon></button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteCategoria('${cat.id}','fornecedores')"><ion-icon name="trash-outline" id="ionicons-estoque"></button></div></div></div>`).join('');
+            const modalContainer = document.getElementById('modal-categorias-list-fornecedor');
+            if (modalContainer) modalContainer.innerHTML = template;
+        }
+
         document.getElementById('open-gerenciar-categorias').addEventListener('click', () => {
-            renderCategorias();
+            AppState.categoriaContext = 'produtos';
+            renderCategoriasProdutos();
             openModal('modal-gerenciar-categorias');
         });
 
         document.getElementById('add-categoria').addEventListener('click', () => {
             closeModal('modal-gerenciar-categorias');
-            AppState.editingId = null; document.getElementById('modal-categoria-title').textContent = 'Nova Categoria';
+            AppState.editingId = null; AppState.categoriaContext = 'produtos';
+            document.getElementById('modal-categoria-title').textContent = 'Nova Categoria';
+            document.getElementById('cat-nome').value = ''; document.getElementById('cat-descricao').value = ''; openModal('modal-categoria');
+        });
+
+        document.getElementById('open-gerenciar-categorias-fornecedor').addEventListener('click', () => {
+            AppState.categoriaContext = 'fornecedores';
+            renderCategoriasFornecedores();
+            openModal('modal-gerenciar-categorias-fornecedor');
+        });
+
+        document.getElementById('add-categoria-fornecedor').addEventListener('click', () => {
+            closeModal('modal-gerenciar-categorias-fornecedor');
+            AppState.editingId = null; AppState.categoriaContext = 'fornecedores';
+            document.getElementById('modal-categoria-title').textContent = 'Nova Categoria';
             document.getElementById('cat-nome').value = ''; document.getElementById('cat-descricao').value = ''; openModal('modal-categoria');
         });
 
         document.getElementById('form-categoria').addEventListener('submit', (e) => {
             e.preventDefault();
             const data = { nome: document.getElementById('cat-nome').value, descricao: document.getElementById('cat-descricao').value };
+            const ctx = AppState.categoriaContext || 'produtos';
+
+            // normaliza string para comparação (trim + lowercase + remove acentos)
+            const normalize = s => String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const nomeNormalized = normalize(data.nome);
+            if (!nomeNormalized) { alert('Nome da categoria é obrigatório!'); document.getElementById('cat-nome').focus(); return; }
+
+            const arr = ctx === 'produtos' ? AppState.categoriasProdutos : AppState.categoriasFornecedores;
+            const duplicate = arr.some(c => normalize(c.nome) === nomeNormalized && c.id !== AppState.editingId);
+            if (duplicate) {
+                alert('Já existe uma categoria com esse nome. Escolha outro nome.');
+                document.getElementById('cat-nome').focus();
+                return;
+            }
+
             if (AppState.editingId) {
-                const index = AppState.categorias.findIndex(c => c.id === AppState.editingId);
-                AppState.categorias[index] = { ...AppState.categorias[index], ...data };
-            } else { AppState.categorias.push({ id: generateId(), ...data }); }
-            closeModal('modal-categoria'); renderCategorias(); updateCategoriasCheckboxes();
+                if (ctx === 'produtos') {
+                    const index = AppState.categoriasProdutos.findIndex(c => c.id === AppState.editingId);
+                    AppState.categoriasProdutos[index] = { ...AppState.categoriasProdutos[index], ...data };
+                } else {
+                    const index = AppState.categoriasFornecedores.findIndex(c => c.id === AppState.editingId);
+                    AppState.categoriasFornecedores[index] = { ...AppState.categoriasFornecedores[index], ...data };
+                }
+            } else {
+                if (ctx === 'produtos') AppState.categoriasProdutos.push({ id: generateId(), ...data });
+                else AppState.categoriasFornecedores.push({ id: generateId(), ...data });
+            }
+            closeModal('modal-categoria');
+            if (ctx === 'produtos') { renderCategoriasProdutos(); updateCategoriasCheckboxes(); }
+            else { renderCategoriasFornecedores(); updateCategoriasCheckboxes(); }
         });
 
-        function editCategoria(id) {
-            const cat = AppState.categorias.find(c => c.id === id); AppState.editingId = id;
+        function editCategoria(id, context = 'produtos') {
+            const arr = context === 'fornecedores' ? AppState.categoriasFornecedores : AppState.categoriasProdutos;
+            const cat = arr.find(c => c.id === id);
+            AppState.editingId = id; AppState.categoriaContext = context;
             document.getElementById('modal-categoria-title').textContent = 'Editar Categoria';
-            document.getElementById('cat-nome').value = cat.nome; document.getElementById('cat-descricao').value = cat.descricao;
-            closeModal('modal-gerenciar-categorias');
+            document.getElementById('cat-nome').value = cat ? cat.nome : '';
+            document.getElementById('cat-descricao').value = cat ? cat.descricao : '';
+            if (context === 'fornecedores') closeModal('modal-gerenciar-categorias-fornecedor');
+            else closeModal('modal-gerenciar-categorias');
             openModal('modal-categoria');
         }
 
-        function deleteCategoria(id) {
-            if (confirm('Deseja realmente excluir esta categoria?')) {
-                AppState.categorias = AppState.categorias.filter(c => c.id !== id);
-                renderCategorias(); updateCategoriasCheckboxes();
+        function deleteCategoria(id, context = 'produtos') {
+            if (!confirm('Deseja realmente excluir esta categoria?')) return;
+
+            const isFornecedores = context === 'fornecedores';
+            const sourceArr = isFornecedores ? AppState.categoriasFornecedores : AppState.categoriasProdutos;
+            const cat = (sourceArr || []).find(c => c.id === id);
+
+            // remove a categoria da lista principal
+            if (isFornecedores) {
+                AppState.categoriasFornecedores = (AppState.categoriasFornecedores || []).filter(c => c.id !== id);
+            } else {
+                AppState.categoriasProdutos = (AppState.categoriasProdutos || []).filter(c => c.id !== id);
             }
+
+            // normaliza para comparar nomes (trim + lowercase + sem acentos)
+            const normalize = s => String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+            // remove referência da categoria dos produtos ou fornecedores correspondentes
+            if (cat && cat.nome) {
+                const target = normalize(cat.nome);
+                if (isFornecedores) {
+                    AppState.fornecedores = (AppState.fornecedores || []).map(f => {
+                        if (!Array.isArray(f.categorias)) return f;
+                        const updated = f.categorias.filter(n => normalize(n) !== target);
+                        return { ...f, categorias: updated };
+                    });
+                    renderCategoriasFornecedores();
+                    if (typeof renderFornecedores === 'function') renderFornecedores();
+                } else {
+                    AppState.produtos = (AppState.produtos || []).map(p => {
+                        if (!Array.isArray(p.categorias)) return p;
+                        const updated = p.categorias.filter(n => normalize(n) !== target);
+                        return { ...p, categorias: updated };
+                    });
+                    renderCategoriasProdutos();
+                    if (typeof renderProdutos === 'function') renderProdutos();
+                    if (typeof renderProdutosParaVenda === 'function') renderProdutosParaVenda();
+                }
+            } else {
+                // mesmo quando não encontramos o objeto (proteção), atualiza as views
+                if (isFornecedores) renderCategoriasFornecedores();
+                else {
+                    renderCategoriasProdutos();
+                    if (typeof renderProdutos === 'function') renderProdutos();
+                    if (typeof renderProdutosParaVenda === 'function') renderProdutosParaVenda();
+                }
+            }
+
+            updateCategoriasCheckboxes();
         }
 
         function updateCategoriasCheckboxes() {
-            ['prod-categorias', 'forn-categorias'].forEach(containerId => {
-                const container = document.getElementById(containerId);
-                if (container) container.innerHTML = AppState.categorias.map(cat => `<div class="checkbox-item"><input type="checkbox" id="${containerId}-${cat.id}" value="${cat.nome}"><label for="${containerId}-${cat.id}">${cat.nome}</label></div>`).join('');
-            });
+            const prodContainer = document.getElementById('prod-categorias');
+            if (prodContainer) prodContainer.innerHTML = (AppState.categoriasProdutos || []).map(cat => `<div class="checkbox-item"><input type="checkbox" id="prod-categorias-${cat.id}" value="${cat.nome}"><label for="prod-categorias-${cat.id}">${cat.nome}</label></div>`).join('');
+            const fornContainer = document.getElementById('forn-categorias');
+            if (fornContainer) fornContainer.innerHTML = (AppState.categoriasFornecedores || []).map(cat => `<div class="checkbox-item"><input type="checkbox" id="forn-categorias-${cat.id}" value="${cat.nome}"><label for="forn-categorias-${cat.id}">${cat.nome}</label></div>`).join('');
         }
 
         function renderProdutos() {
             const tbody = document.getElementById('produtos-table');
-            if (AppState.produtos.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum produto cadastrado</td></tr>'; return; }
-            tbody.innerHTML = AppState.produtos.map(prod => `<tr><td><span class="product-code">${prod.codigo}</span></td><td><strong>${prod.nome}</strong></td><td><div class="category-tags">${prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('')}</div></td><td class="${prod.quantidade <= prod.minimo ? 'product-stock low' : ''}">${prod.quantidade}</td><td>${prod.minimo}</td><td>${formatCurrency(prod.preco)}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editProduto('${prod.id}')"><ion-icon name="pencil-outline" id="ionicons-estoque"></ion-icon></button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteProduto('${prod.id}')"><ion-icon name="trash-outline" id="ionicons-estoque"></ion-icon></button></div></td></tr>`).join('');
+            if (!tbody) return;
+            if (AppState.produtos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum produto cadastrado</td></tr>';
+                return;
+            }
+            const qEl = document.getElementById('search-estoque');
+            const queryRaw = qEl ? String(qEl.value).trim() : '';
+            const normalize = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            let filtered = AppState.produtos;
+            if (queryRaw) {
+                const q = normalize(queryRaw);
+                const qNum = parseFloat(queryRaw.replace(',', '.'));
+                const isNum = !isNaN(qNum);
+                const qNoSpace = q.replace(/\s+/g, '');
+                const isSemCategoria = qNoSpace === 'semcategoria';
+                filtered = AppState.produtos.filter(prod => {
+                    // if user searches 'sem categoria', show products with no categories
+                    if (isSemCategoria) return !(prod.categorias && prod.categorias.length);
+                    const name = normalize(prod.nome);
+                    const code = normalize(prod.codigo);
+                    const cats = (prod.categorias || []).map(c => normalize(c));
+                    const pricePt = prod.preco.toFixed(2).replace('.', ',');
+                    const priceEn = prod.preco.toFixed(2);
+                    const priceMatch = isNum ? Math.abs(prod.preco - qNum) < 0.001 : pricePt.includes(queryRaw) || priceEn.includes(queryRaw.replace(',', '.'));
+                    return name.includes(q) || code.includes(q) || cats.some(c => c.includes(q)) || priceMatch;
+                });
+            }
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum produto encontrado</td></tr>';
+                return;
+            }
+            tbody.innerHTML = filtered.map(prod => {
+                const catsHtml = (prod.categorias && prod.categorias.length) ? prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag">Sem categoria</span>';
+                return `<tr><td><span class="product-code">${prod.codigo}</span></td><td><strong>${prod.nome}</strong></td><td><div class="category-tags">${catsHtml}</div></td><td class="${prod.quantidade <= prod.minimo ? 'product-stock low' : ''}">${prod.quantidade}</td><td>${prod.minimo}</td><td>${formatCurrency(prod.preco)}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editProduto('${prod.id}')"><ion-icon name="pencil-outline" id="ionicons-estoque"></ion-icon></button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteProduto('${prod.id}')"><ion-icon name="trash-outline" id="ionicons-estoque"></ion-icon></button></div></td></tr>`;
+            }).join('');
         }
+
+        // update table on typing in estoque search
+        const estoqueSearchEl = document.getElementById('search-estoque');
+        if (estoqueSearchEl) estoqueSearchEl.addEventListener('input', renderProdutos);
 
         document.getElementById('add-produto').addEventListener('click', () => {
             AppState.editingId = null; document.getElementById('modal-produto-title').textContent = 'Novo Produto';
@@ -616,8 +821,17 @@
             e.preventDefault();
             const selectedCats = []; document.querySelectorAll('#prod-categorias input:checked').forEach(cb => selectedCats.push(cb.value));
             if (selectedCats.length === 0) { alert('Selecione ao menos uma categoria!'); return; }
+            const codigoEl = document.getElementById('prod-codigo');
+            const newCode = (codigoEl.value || '').trim();
+            if (!newCode) { alert('Código é obrigatório!'); codigoEl.focus(); return; }
+            const isDuplicate = AppState.produtos.some(p => {
+                if (!p || !p.codigo) return false;
+                if (AppState.editingId && p.id === AppState.editingId) return false;
+                return String(p.codigo).trim().toLowerCase() === newCode.toLowerCase();
+            });
+            if (isDuplicate) { alert('Já existe um produto com esse código. Escolha outro código.'); codigoEl.focus(); return; }
             const data = {
-                codigo: document.getElementById('prod-codigo').value, nome: document.getElementById('prod-nome').value, categorias: selectedCats,
+                codigo: newCode, nome: document.getElementById('prod-nome').value, categorias: selectedCats,
                 quantidade: parseInt(document.getElementById('prod-quantidade').value), minimo: parseInt(document.getElementById('prod-minimo').value),
                 preco: parseFloat(document.getElementById('prod-preco').value), localizacao: document.getElementById('prod-localizacao').value
             };
@@ -650,11 +864,21 @@
         }
 
         function renderProdutosParaVenda() {
-            const search = document.getElementById('search-produto').value.toLowerCase();
-            const filtered = AppState.produtos.filter(p => p.nome.toLowerCase().includes(search) || p.codigo.toLowerCase().includes(search) || p.categorias.some(cat => cat.toLowerCase().includes(search)));
+            const rawSearch = document.getElementById('search-produto').value || '';
+            const normalize = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            const normSearch = normalize(rawSearch);
+            const isSemCategoria = normSearch.replace(/\s+/g, '') === 'semcategoria';
+            const searchLower = rawSearch.toLowerCase();
+            const filtered = AppState.produtos.filter(p => {
+                if (isSemCategoria) return !(p.categorias && p.categorias.length);
+                return p.nome.toLowerCase().includes(searchLower) || p.codigo.toLowerCase().includes(searchLower) || (p.categorias || []).some(cat => cat.toLowerCase().includes(searchLower));
+            });
             const container = document.getElementById('produtos-list');
             if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">Nenhum produto encontrado</div>'; return; }
-            container.innerHTML = filtered.map(prod => `<button class="product-card" ${prod.quantidade === 0 ? 'disabled' : ''} onclick="addToCart('${prod.id}')"><div><div class="product-code">${prod.codigo}</div><div class="product-name">${prod.nome}</div><div class="category-tags">${prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('')}</div><div class="product-price">${formatCurrency(prod.preco)}</div><div class="product-stock ${prod.quantidade <= prod.minimo ? 'low' : ''}">Estoque: ${prod.quantidade}</div></div></button>`).join('');
+            container.innerHTML = filtered.map(prod => {
+                const catsHtml = (prod.categorias && prod.categorias.length) ? prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag">Sem categoria</span>';
+                return `<button class="product-card" ${prod.quantidade === 0 ? 'disabled' : ''} onclick="addToCart('${prod.id}')"><div><div class="product-code">${prod.codigo}</div><div class="product-name">${prod.nome}</div><div class="category-tags">${catsHtml}</div><div class="product-price">${formatCurrency(prod.preco)}</div><div class="product-stock ${prod.quantidade <= prod.minimo ? 'low' : ''}">Estoque: ${prod.quantidade}</div></div></button>`;
+            }).join('');
         }
 
         document.getElementById('search-produto').addEventListener('input', renderProdutosParaVenda);
@@ -934,18 +1158,47 @@
                 produtoCategorias: produto.categorias, tipo: tipo, quantidade: quantidade, data: new Date().toISOString(), motivo: motivo || '-'
             });
             alert('Movimentação registrada com sucesso!');
-            document.getElementById('form-movimentacao').reset();
+            const form = document.getElementById('form-movimentacao'); if (form) form.reset();
             document.getElementById('mov-produto-selected-id').value = '';
             const autoInput = document.getElementById('mov-produto-autocomplete'); if (autoInput) autoInput.value = '';
-            document.getElementById('mov-tipo').value = 'entrada'; renderMovimentacoes(); renderProdutos();
+            // ensure the hidden mov-tipo reflects the visually active toggle button
+            const activeToggle = document.querySelector('.toggle-btn.active');
+            if (activeToggle) document.getElementById('mov-tipo').value = activeToggle.dataset.tipo;
+            renderMovimentacoes(); renderProdutos();
         });
 
         function renderMovimentacoes() {
             const tbody = document.getElementById('movimentacoes-table');
+            if (!tbody) return;
             if (AppState.movimentacoes.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhuma movimentação registrada</td></tr>'; return; }
-            const sorted = [...AppState.movimentacoes].sort((a, b) => new Date(b.data) - new Date(a.data));
+            const q = (document.getElementById('search-movimentacao')?.value || '').trim().toLowerCase();
+            const tipo = document.getElementById('filter-mov-tipo')?.value || 'all';
+
+            const filtered = AppState.movimentacoes.filter(mov => {
+                if (tipo !== 'all' && mov.tipo !== tipo) return false;
+                if (q) {
+                    const qNum = Number(q.replace(',', '.'));
+                    const isNum = !isNaN(qNum);
+                    const prodName = (mov.produtoNome || '').toLowerCase();
+                    const prodCode = (mov.produtoCodigo || '').toLowerCase();
+                    const motivo = (mov.motivo || '').toLowerCase();
+                    const matchesText = prodName.includes(q) || prodCode.includes(q) || motivo.includes(q);
+                    const matchesNumber = isNum && (mov.quantidade === qNum || (mov.produtoCodigo && Number(mov.produtoCodigo) === qNum));
+                    if (!matchesText && !matchesNumber) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhuma movimentação encontrada</td></tr>'; return; }
+            const sorted = filtered.sort((a, b) => new Date(b.data) - new Date(a.data));
             tbody.innerHTML = sorted.map(mov => `<tr><td>${formatDate(mov.data)}</td><td><span class="badge ${mov.tipo === 'entrada' ? 'badge-success' : 'badge-danger'}">${mov.tipo === 'entrada' ? 'Entrada' : 'Saída'}</span></td><td><span class="product-code">${mov.produtoCodigo}</span></td><td>${mov.produtoNome}</td><td>${mov.quantidade}</td><td>${mov.motivo}</td></tr>`).join('');
         }
+
+        // listeners for Movimentações filters
+        const movSearchEl = document.getElementById('search-movimentacao');
+        if (movSearchEl) movSearchEl.addEventListener('input', renderMovimentacoes);
+        const movTipoEl = document.getElementById('filter-mov-tipo');
+        if (movTipoEl) movTipoEl.addEventListener('change', renderMovimentacoes);
 
         function gerarCodigoFiado() {
             const maxNum = AppState.fiados.reduce((max, f) => {
@@ -960,11 +1213,45 @@
         });
 
         function renderFiados() {
-            const search = document.getElementById('search-fiado').value.toLowerCase();
-            const filtered = AppState.fiados.filter(f => f.nome.toLowerCase().includes(search) || f.codigo.toLowerCase().includes(search) || f.telefone.includes(search));
+            const search = (document.getElementById('search-fiado')?.value || '').trim().toLowerCase();
+            const pagoFilter = document.getElementById('filter-fiado-pago')?.value || 'all';
+
             document.getElementById('total-fiados').textContent = AppState.fiados.length;
             const totalDevido = AppState.fiados.reduce((acc, f) => f.pago ? acc : acc + f.valorDevido, 0);
             document.getElementById('total-devido').textContent = formatCurrency(totalDevido);
+
+            const hoje = new Date();
+            const filtered = AppState.fiados.filter(f => {
+                if (pagoFilter === 'paid' && !f.pago) return false;
+                if (pagoFilter === 'unpaid' && f.pago) return false;
+                if (pagoFilter === 'expired') {
+                    if (f.pago) return false;
+                    let prazo;
+                    if (f.dataPrazo && /^\d{4}-\d{2}-\d{2}$/.test(f.dataPrazo)) {
+                        const parts = f.dataPrazo.split('-').map(Number);
+                        prazo = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999);
+                    } else {
+                        prazo = new Date(f.dataPrazo);
+                    }
+                    if (!prazo || isNaN(prazo) || prazo >= hoje) return false;
+                }
+                if (search) {
+                    const qNum = Number(search.replace(',', '.'));
+                    const isNum = !isNaN(qNum);
+                    const nome = (f.nome || '').toLowerCase();
+                    const codigo = (f.codigo || '').toLowerCase();
+                    const telefone = (f.telefone || '').toLowerCase();
+                    const cpf = (f.cpf || '').toLowerCase();
+                    if (isNum) {
+                        if (Math.abs(f.valorDevido - qNum) < 0.001 || codigo.includes(search) || nome.includes(search)) return true;
+                        return false;
+                    } else {
+                        return nome.includes(search) || codigo.includes(search) || telefone.includes(search) || cpf.includes(search) || (f.observacoes || '').toLowerCase().includes(search);
+                    }
+                }
+                return true;
+            });
+
             const tbody = document.getElementById('fiados-table');
             if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum cliente encontrado</td></tr>'; return; }
             tbody.innerHTML = filtered.map(f => {
@@ -984,7 +1271,8 @@
             }).join('');
         }
 
-        document.getElementById('search-fiado').addEventListener('input', renderFiados);
+        const sf = document.getElementById('search-fiado'); if (sf) sf.addEventListener('input', renderFiados);
+        const ffPago = document.getElementById('filter-fiado-pago'); if (ffPago) ffPago.addEventListener('change', renderFiados);
 
         document.getElementById('add-fiado').addEventListener('click', () => {
             AppState.editingId = null;
@@ -1074,11 +1362,26 @@
 
         document.getElementById('form-cliente').addEventListener('submit', (e) => {
             e.preventDefault();
+            const nomeEl = document.getElementById('cli-nome');
+            const cpfEl = document.getElementById('cli-cpf');
+            const rawName = (nomeEl.value || '').trim();
+            const rawCpf = (cpfEl.value || '').trim();
+            const normalizeName = s => String(s || '').trim().replace(/\s+/g,' ').toLowerCase();
+            const newNameNorm = normalizeName(rawName);
+            const newCpfDigits = rawCpf.replace(/\D/g, '');
+            if (!newNameNorm) { alert('Nome é obrigatório!'); nomeEl.focus(); return; }
+            // Apenas checar duplicidade por CPF (não por nome)
+            const isDuplicateCpf = newCpfDigits && AppState.clientes.some(c => {
+                if (AppState.editingId && c.id === AppState.editingId) return false;
+                const existingCpfDigits = (c.cpf || '').replace(/\D/g, '');
+                return existingCpfDigits === newCpfDigits;
+            });
+            if (isDuplicateCpf) { alert('Já existe um cliente com esse CPF.'); cpfEl.focus(); return; }
             const data = {
-                nome: document.getElementById('cli-nome').value,
+                nome: rawName,
                 telefone: document.getElementById('cli-telefone').value,
                 email: document.getElementById('cli-email').value,
-                cpf: document.getElementById('cli-cpf').value,
+                cpf: rawCpf,
                 endereco: document.getElementById('cli-endereco').value,
                 dataCadastro: new Date().toISOString()
             };
@@ -1103,11 +1406,28 @@
 
         function renderFornecedores() {
             document.getElementById('total-fornecedores').textContent = AppState.fornecedores.length;
-            const search = document.getElementById('search-fornecedor').value.toLowerCase();
-            const filtered = AppState.fornecedores.filter(f => f.nome.toLowerCase().includes(search) || f.cpfCnpj.includes(search));
+            const rawSearch = (document.getElementById('search-fornecedor')?.value || '');
+            const normalize = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            const normSearch = normalize(rawSearch);
+            const isSemCategoria = normSearch.replace(/\s+/g, '') === 'semcategoria';
+            const search = rawSearch.trim().toLowerCase();
+            const filtered = AppState.fornecedores.filter(f => {
+                if (isSemCategoria) return !(f.categorias && f.categorias.length);
+                const nome = (f.nome || '').toLowerCase();
+                const cpf = (f.cpfCnpj || '').toLowerCase();
+                const cats = (f.categorias || []).join(' ').toLowerCase();
+                const cidade = (f.cidade || '').toLowerCase();
+                const telefone = (f.telefone || '').toLowerCase();
+                const email = (f.email || '').toLowerCase();
+                if (!search) return true;
+                return nome.includes(search) || cpf.includes(search) || cats.includes(search) || cidade.includes(search) || telefone.includes(search) || email.includes(search);
+            });
             const tbody = document.getElementById('fornecedores-table');
             if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum fornecedor encontrado</td></tr>'; return; }
-            tbody.innerHTML = filtered.map(f => `<tr><td><strong>${f.nome}</strong></td><td>${f.cpfCnpj}</td><td><div class="category-tags">${f.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('')}</div></td><td>${f.cidade}</td><td>${f.telefone}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editFornecedor('${f.id}')">✏️</button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteFornecedor('${f.id}')">🗑️</button></div></td></tr>`).join('');
+            tbody.innerHTML = filtered.map(f => {
+                const catsHtml = (f.categorias && f.categorias.length) ? (f.categorias||[]).map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag">Sem categoria</span>';
+                return `<tr><td><strong>${f.nome}</strong></td><td>${f.cpfCnpj}</td><td><div class="category-tags">${catsHtml}</div></td><td>${f.cidade}</td><td>${f.telefone}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editFornecedor('${f.id}')">✏️</button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteFornecedor('${f.id}')">🗑️</button></div></td></tr>`;
+            }).join('');
         }
 
         document.getElementById('search-fornecedor').addEventListener('input', renderFornecedores);
@@ -1210,6 +1530,22 @@
         // });
 
         renderView('caixa'); updateCategoriasCheckboxes();
+
+        // abre modal de registrar movimentação
+        const openMovBtn = document.getElementById('open-registrar-mov');
+        if (openMovBtn) {
+            openMovBtn.addEventListener('click', () => {
+                const form = document.getElementById('form-movimentacao'); if (form) form.reset();
+                const selId = document.getElementById('mov-produto-selected-id'); if (selId) selId.value = '';
+                const autoInput = document.getElementById('mov-produto-autocomplete'); if (autoInput) autoInput.value = '';
+                // reset toggle to entrada
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                const entradaBtn = document.querySelector('.toggle-btn[data-tipo="entrada"]'); if (entradaBtn) entradaBtn.classList.add('active');
+                const movTipo = document.getElementById('mov-tipo'); if (movTipo) movTipo.value = 'entrada';
+                updateProdutosSelect();
+                openModal('modal-movimentacao');
+            });
+        }
 
         document.querySelector('.nav-sair-btn').addEventListener('click', () => {
             // volta para a tela de login
