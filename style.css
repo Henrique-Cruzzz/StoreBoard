@@ -4,6 +4,61 @@
   box-sizing: border-box;
 }
 
+/* Ensure main content fills remaining space and is scrollable */
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  overflow: auto;
+  max-height: 100vh;
+}
+
+/* Smooth sidebar resizing */
+.sidebar {
+  transition: width 200ms ease;
+}
+
+/* Responsive adjustments for larger screens */
+@media (min-width: 769px) and (max-width: 1024px) {
+  body { overflow: auto; }
+  .container { max-width: 1000px; padding: 1rem; }
+  .sidebar { width: 260px; }
+  .nav-btn { padding: 16px 28px; font-size: 15px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(200px, 1fr)); }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .card { padding: 1.25rem; }
+  .modal-content { max-width: 700px; }
+}
+
+@media (min-width: 1025px) and (max-width: 1366px) {
+  body { overflow: auto; }
+  .container { max-width: 1200px; padding: 1.5rem; }
+  .sidebar { width: 300px; }
+  .nav-btn { padding: 18px 32px; font-size: 16px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(240px, 1fr)); }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .modal-content { max-width: 900px; }
+  #caixa-view .card { height: min(80vh, 900px); }
+  #estoque-view .card { max-height: 85vh; }
+}
+
+@media (min-width: 1367px) {
+  body { overflow: auto; }
+  .container { max-width: 1600px; padding: 2rem; }
+  .sidebar { width: 340px; }
+  .nav-btn { padding: 22px 36px; font-size: 18px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(4, minmax(260px, 1fr)); }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .card { padding: 2rem; }
+  .modal-content { max-width: 1100px; }
+  #caixa-view .card { height: min(85vh, 1000px); }
+  .product-card { max-height: 220px; }
+}
+
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -77,11 +132,12 @@ nav {
   width: 90%;
 }
 
-/* .main-content {
+.main-content {
   flex: 1;
   padding: 1.5rem;
-  border: solid red;
-} */
+  overflow: auto;
+  max-height: 100vh;
+}
 
 .container {
   max-width: 1400px;
@@ -194,6 +250,7 @@ main {
   display: block;
 }
 
+
 #caixa-view .card{
   position: relative; /* torna possível posicionar elementos filhos em relação ao cartão */
   height: 90vh;
@@ -248,15 +305,31 @@ main {
     margin-top: 1rem;
 }
 
-
-
 #ionicons-estoque{
     width: 20px;
     height: 20px;
 }
 
 
+#movimentacao-view .card #card{
+  max-height: 420px;
+  overflow-y: scroll;
+}
 
+#fornecedores-view .card{
+  max-height: 700px;
+  overflow-y: scroll;
+}
+
+#clientes-view .card{
+  max-height: 700px;
+  overflow-y: scroll;
+} 
+
+#prancheta-view .card{
+  max-height: 700px;
+  overflow-y: scroll;
+}
 .card {
   background: white;
   border-radius: 0.5rem;
@@ -549,6 +622,13 @@ tr:hover {
   background: white;
 }
 
+#caixa-view .product-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  max-height: 150px;
+}
+
 .product-card:hover:not(:disabled) {
   border-color: #2563eb;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -800,4 +880,35 @@ tr:hover {
   .product-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Sidebar responsive tweaks: reduce nav button size to avoid cut-off on smaller screens */
+@media (max-width: 1536px){
+  .sidebar { width: 260px; }
+  .sidebar-content { padding: 1.25rem 0.75rem; }
+  .sidebar-logo img { width: 85%; max-width: 180px; }
+  .nav-btn { padding: 16px 18px; font-size: 14px; border-radius: 30px; box-sizing: border-box; }
+  .nav-btn p { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  nav { width: 100%; }
+}
+@media (max-width: 1366px) {
+  .sidebar { width: 260px; }
+  .sidebar-content { padding: 1.25rem 0.75rem; }
+  .sidebar-logo img { width: 85%; max-width: 180px; }
+  .nav-btn { padding: 12px 18px; font-size: 14px; border-radius: 30px; box-sizing: border-box; }
+  .nav-btn p { display: inline-block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  nav { width: 100%; }
+}
+
+@media (max-width: 1024px) {
+  .sidebar { width: 240px; }
+  .nav-btn { padding: 10px 14px; font-size: 13px; }
+  .sidebar-content { padding: 1rem 0.5rem; }
+}
+
+@media (max-width: 900px) {
+  .sidebar { width: 100%; }
+  nav{height: auto; flex-direction: row; gap: 0.5rem; padding: 0.5rem;}
+  .nav-btn { padding: 8px 12px; font-size: 12px; }
+  .nav-sair-btn { font-size: 12px; max-width: 120px; display: flex; justify-content: center; align-items: center;  padding: 8px; margin: 0;}
 }
