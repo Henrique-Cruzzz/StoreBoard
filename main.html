@@ -685,10 +685,33 @@
             if (AppState.editingId) {
                 if (ctx === 'produtos') {
                     const index = AppState.categoriasProdutos.findIndex(c => c.id === AppState.editingId);
-                    AppState.categoriasProdutos[index] = { ...AppState.categoriasProdutos[index], ...data };
+                    const oldName = index > -1 ? AppState.categoriasProdutos[index].nome : null;
+                    if (index > -1) AppState.categoriasProdutos[index] = { ...AppState.categoriasProdutos[index], ...data };
+                    // se o nome mudou, atualizar referências nos produtos
+                    if (oldName && normalize(oldName) !== nomeNormalized) {
+                        const target = normalize(oldName);
+                        AppState.produtos = (AppState.produtos || []).map(p => {
+                            if (!Array.isArray(p.categorias)) return p;
+                            const updated = p.categorias.map(catName => normalize(catName) === target ? data.nome : catName);
+                            return { ...p, categorias: updated };
+                        });
+                        if (typeof renderProdutos === 'function') renderProdutos();
+                        if (typeof renderProdutosParaVenda === 'function') renderProdutosParaVenda();
+                    }
                 } else {
                     const index = AppState.categoriasFornecedores.findIndex(c => c.id === AppState.editingId);
-                    AppState.categoriasFornecedores[index] = { ...AppState.categoriasFornecedores[index], ...data };
+                    const oldName = index > -1 ? AppState.categoriasFornecedores[index].nome : null;
+                    if (index > -1) AppState.categoriasFornecedores[index] = { ...AppState.categoriasFornecedores[index], ...data };
+                    // se o nome mudou, atualizar referências nos fornecedores
+                    if (oldName && normalize(oldName) !== nomeNormalized) {
+                        const target = normalize(oldName);
+                        AppState.fornecedores = (AppState.fornecedores || []).map(f => {
+                            if (!Array.isArray(f.categorias)) return f;
+                            const updated = f.categorias.map(catName => normalize(catName) === target ? data.nome : catName);
+                            return { ...f, categorias: updated };
+                        });
+                        if (typeof renderFornecedores === 'function') renderFornecedores();
+                    }
                 }
             } else {
                 if (ctx === 'produtos') AppState.categoriasProdutos.push({ id: generateId(), ...data });
@@ -706,8 +729,14 @@
             document.getElementById('modal-categoria-title').textContent = 'Editar Categoria';
             document.getElementById('cat-nome').value = cat ? cat.nome : '';
             document.getElementById('cat-descricao').value = cat ? cat.descricao : '';
-            if (context === 'fornecedores') closeModal('modal-gerenciar-categorias-fornecedor');
-            else closeModal('modal-gerenciar-categorias');
+            // Fechar o modal de gerenciar categorias sem resetar AppState.editingId
+            if (context === 'fornecedores') {
+                const el = document.getElementById('modal-gerenciar-categorias-fornecedor');
+                if (el) el.classList.remove('active');
+            } else {
+                const el = document.getElementById('modal-gerenciar-categorias');
+                if (el) el.classList.remove('active');
+            }
             openModal('modal-categoria');
         }
 
@@ -803,7 +832,7 @@
                 return;
             }
             tbody.innerHTML = filtered.map(prod => {
-                const catsHtml = (prod.categorias && prod.categorias.length) ? prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag">Sem categoria</span>';
+                const catsHtml = (prod.categorias && prod.categorias.length) ? prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag none">Sem categoria</span>';
                 return `<tr><td><span class="product-code">${prod.codigo}</span></td><td><strong>${prod.nome}</strong></td><td><div class="category-tags">${catsHtml}</div></td><td class="${prod.quantidade <= prod.minimo ? 'product-stock low' : ''}">${prod.quantidade}</td><td>${prod.minimo}</td><td>${formatCurrency(prod.preco)}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editProduto('${prod.id}')"><ion-icon name="pencil-outline" id="ionicons-estoque"></ion-icon></button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteProduto('${prod.id}')"><ion-icon name="trash-outline" id="ionicons-estoque"></ion-icon></button></div></td></tr>`;
             }).join('');
         }
@@ -876,7 +905,7 @@
             const container = document.getElementById('produtos-list');
             if (filtered.length === 0) { container.innerHTML = '<div class="empty-state">Nenhum produto encontrado</div>'; return; }
             container.innerHTML = filtered.map(prod => {
-                const catsHtml = (prod.categorias && prod.categorias.length) ? prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag">Sem categoria</span>';
+                const catsHtml = (prod.categorias && prod.categorias.length) ? prod.categorias.map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag none">Sem categoria</span>';
                 return `<button class="product-card" ${prod.quantidade === 0 ? 'disabled' : ''} onclick="addToCart('${prod.id}')"><div><div class="product-code">${prod.codigo}</div><div class="product-name">${prod.nome}</div><div class="category-tags">${catsHtml}</div><div class="product-price">${formatCurrency(prod.preco)}</div><div class="product-stock ${prod.quantidade <= prod.minimo ? 'low' : ''}">Estoque: ${prod.quantidade}</div></div></button>`;
             }).join('');
         }
@@ -1291,8 +1320,28 @@
             const cliente = AppState.clientes.find(c => c.id === selectedClienteId);
             if (!cliente) { alert('Cliente não encontrado!'); return; }
             const auto = document.getElementById('fiado-codigo-auto').checked;
-            const codigo = auto ? gerarCodigoFiado() : document.getElementById('fiado-codigo-manual').value;
+            let codigo = auto ? gerarCodigoFiado() : (document.getElementById('fiado-codigo-manual').value || '').trim();
             if (!codigo) { alert('Informe o código!'); return; }
+
+            // Verifica duplicidade de código (exclui o próprio quando em edição)
+            const codigoNormalized = (codigo || '').trim().toLowerCase();
+            const duplicate = AppState.fiados.some(f => (f.codigo || '').trim().toLowerCase() === codigoNormalized && f.id !== AppState.editingId);
+            if (duplicate) {
+                if (auto) {
+                    // Caso raro de colisão, gera próximo código único
+                    let tries = 0;
+                    let newCode = gerarCodigoFiado();
+                    while (AppState.fiados.some(f => (f.codigo || '').trim().toLowerCase() === (newCode || '').trim().toLowerCase()) && tries < 1000) {
+                        newCode = gerarCodigoFiado();
+                        tries++;
+                    }
+                    codigo = newCode;
+                } else {
+                    alert('Já existe um registro com esse código. Informe outro código.');
+                    return;
+                }
+            }
+
             const data = {
                 codigo: codigo,
                 clienteId: cliente.id,
@@ -1307,7 +1356,7 @@
             };
             if (AppState.editingId) {
                 const index = AppState.fiados.findIndex(f => f.id === AppState.editingId);
-                AppState.fiados[index] = { ...AppState.fiados[index], ...data };
+                if (index > -1) AppState.fiados[index] = { ...AppState.fiados[index], ...data };
             } else { AppState.fiados.push({ id: generateId(), ...data }); }
             closeModal('modal-fiado'); renderFiados();
         });
@@ -1425,7 +1474,7 @@
             const tbody = document.getElementById('fornecedores-table');
             if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum fornecedor encontrado</td></tr>'; return; }
             tbody.innerHTML = filtered.map(f => {
-                const catsHtml = (f.categorias && f.categorias.length) ? (f.categorias||[]).map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag">Sem categoria</span>';
+                const catsHtml = (f.categorias && f.categorias.length) ? (f.categorias||[]).map(cat => `<span class="category-tag">${cat}</span>`).join('') : '<span class="category-tag none">Sem categoria</span>';
                 return `<tr><td><strong>${f.nome}</strong></td><td>${f.cpfCnpj}</td><td><div class="category-tags">${catsHtml}</div></td><td>${f.cidade}</td><td>${f.telefone}</td><td><div class="flex gap-2"><button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="editFornecedor('${f.id}')">✏️</button><button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="deleteFornecedor('${f.id}')">🗑️</button></div></td></tr>`;
             }).join('');
         }
@@ -1441,15 +1490,40 @@
             e.preventDefault();
             const selectedCats = []; document.querySelectorAll('#forn-categorias input:checked').forEach(cb => selectedCats.push(cb.value));
             if (selectedCats.length === 0) { alert('Selecione ao menos uma categoria!'); return; }
+            const nome = (document.getElementById('forn-nome').value || '').trim();
+            const cpfCnpjRaw = (document.getElementById('forn-cpfcnpj').value || '').trim();
+            const cpfCnpjDigits = cpfCnpjRaw.replace(/\D/g, '');
+
+            // Checagem de duplicidade: prioriza CPF/CNPJ quando fornecido, senão compara por nome
+            const isDuplicate = cpfCnpjDigits
+                ? AppState.fornecedores.some(f => {
+                    if (AppState.editingId && f.id === AppState.editingId) return false;
+                    const fCpfDigits = (f.cpfCnpj || '').replace(/\D/g, '');
+                    return fCpfDigits && fCpfDigits === cpfCnpjDigits;
+                })
+                : AppState.fornecedores.some(f => {
+                    if (AppState.editingId && f.id === AppState.editingId) return false;
+                    return (f.nome || '').trim().toLowerCase() === nome.toLowerCase();
+                });
+
+            if (isDuplicate) { alert('Já existe um fornecedor com esse CPF/CNPJ ou nome.'); return; }
+
             const data = {
-                nome: document.getElementById('forn-nome').value, cpfCnpj: document.getElementById('forn-cpfcnpj').value, categorias: selectedCats,
-                cep: document.getElementById('forn-cep').value, rua: document.getElementById('forn-rua').value, numero: document.getElementById('forn-numero').value,
-                bairro: document.getElementById('forn-bairro').value, cidade: document.getElementById('forn-cidade').value, pais: document.getElementById('forn-pais').value,
-                telefone: document.getElementById('forn-telefone').value, email: document.getElementById('forn-email').value
+                nome: nome,
+                cpfCnpj: cpfCnpjRaw,
+                categorias: selectedCats,
+                cep: document.getElementById('forn-cep').value,
+                rua: document.getElementById('forn-rua').value,
+                numero: document.getElementById('forn-numero').value,
+                bairro: document.getElementById('forn-bairro').value,
+                cidade: document.getElementById('forn-cidade').value,
+                pais: document.getElementById('forn-pais').value,
+                telefone: document.getElementById('forn-telefone').value,
+                email: document.getElementById('forn-email').value
             };
             if (AppState.editingId) {
                 const index = AppState.fornecedores.findIndex(f => f.id === AppState.editingId);
-                AppState.fornecedores[index] = { ...AppState.fornecedores[index], ...data };
+                if (index > -1) AppState.fornecedores[index] = { ...AppState.fornecedores[index], ...data };
             } else { AppState.fornecedores.push({ id: generateId(), ...data }); }
             closeModal('modal-fornecedor'); renderFornecedores();
         });
