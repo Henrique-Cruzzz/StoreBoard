@@ -716,6 +716,12 @@ tr:hover {
   font-size: 0.75rem;
 }
 
+.category-tag.none {
+  background: #fd6e6e;
+  color: rgb(255, 249, 249);
+  font-weight: 600  ;
+}
+
 .toggle-group {
   display: flex;
   gap: 0.5rem;
